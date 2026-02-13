@@ -1,0 +1,4 @@
+drop icmp any any -> any any (msg:"IPS TEST ICMP DROP"; sid :1000001; rev:1;)
+alert http any any -> any any (msg:"TEST CMD PARAM SEEN"; flow:to_server,established; http.uri; content:"cmd="; sid:1000002; rev:1;)
+pass tcp any any -> any 22 (msg:"ALLOW SSH - exclude from IPS drops"; flow:established,to_server; sid:9000001; rev:1;)
+drop http any any -> any any (msg:"Drop request with Fuzz in User-Agent"; http.user_agent; content:"fuzz"; nocase; sid:99867; rev:1;)
