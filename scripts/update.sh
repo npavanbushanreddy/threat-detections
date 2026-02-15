@@ -8,11 +8,11 @@ echo "Pulling latest changes..."
 git pull origin main
 
 echo "Validating Suricata..."
-suricata -T -c /etc/suricata/suricata.yaml
+sudo suricata -T -c /etc/suricata/suricata.yaml
 
 if [ $? -eq 0 ]; then
     echo "Reloading Suricata..."
-    systemctl reload suricata
+    sudo systemctl reload suricata
     echo "Update successful"
 else
     echo "Validation failed. Not reloading."
