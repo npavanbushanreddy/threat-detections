@@ -156,7 +156,7 @@ Planned improvements:
 - MITRE ATT&CK mapping documentation
 - Rule performance benchmarking
 - Sigma rule integration
-- Github + Webhook (ngrok)
+- Github + Webhook (ngrok+flask)
 
 ---
 
