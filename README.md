@@ -1,16 +1,22 @@
 # Threat-Detections
 
-Threat-Detections is a Detection-as-Code repository designed to manage and deploy security detection logic in a structured, version-controlled manner.
+**ThreatDetections** is a Git-based detection engineering framework that
+implements structured CI/CD practices for managing and deploying
+detection rules for:
 
-This repository centralizes:
+-   🛡 Suricata (IDS/IPS)
+-   📊 Wazuh (SIEM / Correlation Engine)
 
-- Suricata IPS detection rules
-- Wazuh custom correlation rules and decoders
-- Validation scripts
-- Deployment automation
-- Branch-based promotion workflow (dev → staging → prod)
+This project simulates a production-grade detection lifecycle using:
 
-The goal is to simulate and implement real-world SOC detection engineering practices within an inline IPS + SIEM lab architecture.
+-   Branch promotion strategy (dev → staging → main)
+-   Webhook-triggered automation
+-   Validation gates before deployment
+-   Service health verification
+-   systemd-based persistence
+
+The goal is to treat detection rules as engineered code, not manually
+edited configurations.
 
 ---
 
@@ -30,6 +36,16 @@ All detection content in this repository is deployed to the Suricata + Wazuh VM,
 
 - Inline Intrusion Prevention System (IPS)
 - Security Information and Event Management (SIEM) platform
+
+## Core Components
+
+-   GitHub Repository -- Centralized rule management
+-   Webhook Listener (Flask-based) -- Receives push events
+-   update.sh -- Deployment orchestration script
+-   Suricata 8.x (IPS mode) -- Network detection engine
+-   Wazuh 4.x -- Log-based detection engine
+-   systemd Services -- Auto-start & automation control
+
 
 ---
 
@@ -112,26 +128,114 @@ Detection content is deployed to the Suricata VM using:
 - Branch-aware deployment scripts
 - Boot-time repository synchronization
 - Optional webhook-triggered updates
+- Webhook Listener
+  - webhook.py (Flask)
+  - receives GitHub push events
+  - triggers update.sh
+  - runs deploy only on the approved branch (main)
+
+# 🚀 Deployment Workflow
+
+When a push is made to `main`:
+
+1.  GitHub sends a webhook POST request\
+2.  webhook.py receives the event\
+3.  update.sh is executed\
+4.  Deployment proceeds only if validation passes
 
 Before deployment:
 
 - Suricata configuration is validated
-- Wazuh rules are syntax-checked
+- Wazuh rules are deployed and Wazuh service is restarted to verify correctness
+  Invalid rules will prevent deployment.
 
 Invalid rules are not promoted to production.
+
+ ⚙ Deployment Script (update.sh)
+
+Deployment is controlled by:
+
+    scripts/update.sh
+
+### What It Does
+
+1.  Pulls latest `main` branch\
+2.  Validates Suricata configuration using:\
+    `suricata -T -c /etc/suricata/suricata.yaml`\
+3.  Reloads Suricata only if validation passes\
+4.  Restarts Wazuh Manager\
+5.  Verifies Wazuh service health\
+6.  Aborts if any validation fails
+
+This prevents broken rules from impacting production.
+
+---
+
+# 🔁 Webhook Automation
+
+A Flask-based webhook listener:
+
+    scripts/webhook.py
+
+### Behavior
+
+-   Listens for GitHub push events\
+-   Triggers update.sh\
+-   Executes deployment pipeline\
+-   Runs as a systemd service\
+-   Can be exposed using ngrok (lab setup)
+
+---
+
+# 🛡 Safety Controls Implemented
+
+-   Suricata pre-validation before reload\
+-   Wazuh restart + service health verification\
+-   systemd auto-start for services\
+-   Controlled branch-based deployment
 
 ---
 
 ## 🧪 Testing Methodology
 
-Rules are validated using:
+## Suricata
 
-- Suricata test mode
-- XML linting for Wazuh
-- Controlled attack simulations from Kali
-- Inline IPS drop/alert verification
+-   Validate rules using `suricata -T`\
+-   Generate traffic from Kali\
+-   Verify alerts in `/var/log/suricata/eve.json`
 
-All detections must be reproducible.
+## Wazuh
+
+-   Restart manager\
+-   Verify service health\
+-   Inspect logs in `/var/ossec/logs/ossec.log`
+
+---
+
+# 🔍 Troubleshooting Commands
+
+Check webhook logs:
+
+    journalctl -u threat-webhook.service -n 50 --no-pager
+
+Check Suricata:
+
+    systemctl status suricata
+
+Check Wazuh:
+
+    systemctl status wazuh-manager
+
+---
+
+# 📊 Current Capabilities
+
+-   Version-controlled detection rules\
+-   Branch promotion workflow\
+-   Automated production deployment\
+-   Suricata validation gate\
+-   Wazuh health verification\
+-   systemd-based automation
 
 ---
 
@@ -149,21 +253,19 @@ This repository demonstrates:
 
 ## 🚀 Future Enhancements
 
-Planned improvements:
-
-- CI validation pipeline
-- Automated rollback on failure
-- MITRE ATT&CK mapping documentation
-- Rule performance benchmarking
-- Sigma rule integration
-- Github + Webhook (ngrok + flask) + systemd
+-   Automatic rollback on failed deployment\
+-   Duplicate SID / Rule ID detection\
+-   GitHub Actions CI integration\
+-   Sigma → Wazuh conversion pipeline\
+-   Deployment logging system
 
 ---
 
-## 👤 Maintainer
+## 👤 Author
 
 N Pavan Bushan Reddy  
-Security Engineer | WAF & Detection Engineering Focus
+Security Researcher | WAF/WAS | IDS/IPS | SIEM
+GitHub: https://github.com/npavanbushanreddy
 
 ---
 
