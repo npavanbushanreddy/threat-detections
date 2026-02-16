@@ -18,8 +18,6 @@
 
 </group>
 
-
-
 <group name="suricata,ips,web">
 
   <rule id="100216" level="12">
