@@ -48,22 +48,22 @@ An **end-to-end detection engineering pipeline** mirroring how modern SOCs and M
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    Developer Workflow                         │
-│   git push origin main → GitHub                               │
+│                    Developer Workflow                        │
+│   git push origin main → GitHub                              │
 └─────────────────────┬────────────────────────────────────────┘
                       │  webhook POST (HTTP)
                       ▼
 ┌──────────────────────────────────────────────────────────────┐
-│         AWS EC2 — Detection Sensor (Ubuntu 24.04)             │
+│         AWS EC2 — Detection Sensor (Ubuntu 24.04)            │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │  Flask webhook listener (systemd, port 5000)           │  │
-│  │              │                                          │  │
-│  │              ▼                                          │  │
-│  │  update.sh — validates → reloads → verifies           │  │
-│  │              │                                          │  │
-│  │   ┌──────────┴──────────┐                             │  │
+│  │              │                                         │  │
+│  │              ▼                                         │  │
+│  │  update.sh — validates → reloads → verifies            │  │
+│  │              │                                         │  │
+│  │   ┌──────────┴──────────┐                              │  │
 │  │   ▼                     ▼                              │  │
-│  │  Suricata 8 (NDR)    Wazuh 4.x (SIEM)                 │  │
+│  │  Suricata 8 (NDR)    Wazuh 4.x (SIEM)                  │  │
 │  │  ├ ET ruleset         ├ Manager (rule engine)          │  │
 │  │  └ Custom rules ──────┤ Indexer (OpenSearch)           │  │
 │  │     (symlinked from   ├ Dashboard                      │  │
@@ -184,13 +184,13 @@ The discipline applied here is the same used daily in production WAF operations:
 | Component           | Implementation                                              |
 |---------------------|-------------------------------------------------------------|
 | Repository          | GitHub                                                      |
-| Webhook Listener    | Python 3 + Flask, port 5000                                |
-| Deployment Script   | Bash (`update.sh`) with `set -e` strict mode               |
+| Webhook Listener    | Python 3 + Flask, port 5000                                 |
+| Deployment Script   | Bash (`update.sh`) with `set -e` strict mode                |
 | Service Management  | systemd (`threat-webhook.service`, auto-restart)            |
-| Validation Engine   | Suricata's built-in config test (`-T` flag)                |
-| Permission Model    | Restricted sudoers — webhook can only run pre-approved cmds|
-| Detection Engines   | Suricata 8 (NDR) + Wazuh 4.x (SIEM)                        |
-| Infrastructure      | AWS EC2 (Ubuntu 24.04, c7i-flex.large, gp3 EBS)            |
+| Validation Engine   | Suricata's built-in config test (`-T` flag)                 |
+| Permission Model    | Restricted sudoers — webhook can only run pre-approved cmds |
+| Detection Engines   | Suricata 8 (NDR) + Wazuh 4.x (SIEM)                         |
+| Infrastructure      | AWS EC2 (Ubuntu 24.04, c7i-flex.large, gp3 EBS)             |
 
 ---
 
